@@ -1,0 +1,876 @@
+/* =====================================================
+   SATOSHY - RESTAURANTE JAPONÊS
+   CSS PRINCIPAL DO SITE
+   ===================================================== */
+
+
+/* =====================================================
+   1. CONFIGURAÇÕES GERAIS
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f5efe6;
+    color: #2b2118;
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   2. CABEÇALHO
+   ===================================================== */
+
+header {
+    background: linear-gradient(
+        135deg,
+        #2b1710,
+        #5a2d1e
+    );
+
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
+
+header h1 {
+    font-size: 42px;
+    margin-bottom: 20px;
+    letter-spacing: 3px;
+}
+
+
+/* =====================================================
+   3. MENU DE NAVEGAÇÃO
+   ===================================================== */
+
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: #d9a28f;
+}
+
+
+/* =====================================================
+   4. ÁREA PRINCIPAL
+   ===================================================== */
+
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h2 {
+    color: #5a2d1e;
+}
+
+h3 {
+    color: #8b3326;
+}
+
+
+/* =====================================================
+   5. PÁGINA INICIAL - APRESENTAÇÃO
+   ===================================================== */
+
+.inicio {
+    min-height: 520px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background: linear-gradient(
+        135deg,
+        #f5efe6,
+        #eadbc9
+    );
+
+    border-radius: 14px;
+    margin-bottom: 50px;
+    padding: 70px 30px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+}
+
+.inicio-texto {
+    max-width: 800px;
+}
+
+.inicio .subtitulo {
+    color: #8b3326;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    margin-bottom: 15px;
+}
+
+.inicio h2 {
+    font-size: 48px;
+    color: #4a2418;
+    margin-bottom: 25px;
+    line-height: 1.2;
+}
+
+.inicio p {
+    max-width: 700px;
+    margin: 0 auto 15px;
+    color: #5f554e;
+    line-height: 1.8;
+    font-size: 17px;
+}
+
+
+/* =====================================================
+   6. BOTÕES DA PÁGINA INICIAL
+   ===================================================== */
+
+.botoes-inicio {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.botao,
+.botao-secundario {
+    display: inline-block;
+    padding: 13px 25px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.botao {
+    background-color: #8b3326;
+    color: white;
+}
+
+.botao:hover {
+    background-color: #5a2d1e;
+    transform: translateY(-3px);
+}
+
+.botao-secundario {
+    border: 2px solid #8b3326;
+    color: #8b3326;
+    background-color: transparent;
+}
+
+.botao-secundario:hover {
+    background-color: #8b3326;
+    color: white;
+}
+
+
+/* =====================================================
+   7. DESTAQUES DA PÁGINA INICIAL
+   ===================================================== */
+
+.destaques {
+    margin-bottom: 60px;
+}
+
+.destaques > h2 {
+    text-align: center;
+    font-size: 32px;
+    color: #5a2d1e;
+    margin-bottom: 10px;
+}
+
+.texto-centro {
+    text-align: center;
+    color: #6b625b;
+    margin-bottom: 30px;
+}
+
+
+/* =====================================================
+   8. CARDS
+   ===================================================== */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.card {
+    background-color: #faf7f2;
+    padding: 30px;
+    border-radius: 10px;
+    border-top: 5px solid #8b3326;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-7px);
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.14);
+}
+
+.card h3 {
+    color: #5a2d1e;
+    font-size: 23px;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #625950;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.card a {
+    color: #8b3326;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   9. POR QUE ESCOLHER O SATOSHY
+   ===================================================== */
+
+.porque-satoshy {
+    background-color: #f0e5d7;
+
+    padding: 50px 30px;
+    border-radius: 14px;
+
+    margin-bottom: 60px;
+}
+
+.porque-satoshy h2 {
+    text-align: center;
+    color: #5a2d1e;
+    font-size: 32px;
+    margin-bottom: 35px;
+}
+
+.beneficios {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.beneficios div {
+    background-color: #faf7f2;
+    padding: 25px;
+    border-radius: 9px;
+    text-align: center;
+}
+
+.beneficios h3 {
+    color: #8b3326;
+    margin-bottom: 10px;
+}
+
+.beneficios p {
+    color: #625950;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   10. CHAMADA FINAL DO INÍCIO
+   ===================================================== */
+
+.chamada-inicio {
+    text-align: center;
+
+    padding: 55px 25px;
+    margin-bottom: 50px;
+
+    background: linear-gradient(
+        135deg,
+        #5a2d1e,
+        #2b1710
+    );
+
+    border-radius: 14px;
+}
+
+.chamada-inicio h2 {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.chamada-inicio p {
+    color: #f5efe6;
+    margin-bottom: 25px;
+}
+
+
+/* =====================================================
+   11. PÁGINA DO CARDÁPIO
+   ===================================================== */
+
+.descricao-cardapio {
+    text-align: center;
+    color: #625950;
+    margin-bottom: 40px;
+}
+
+.categoria-cardapio {
+    margin-bottom: 45px;
+}
+
+.categoria-cardapio h3 {
+    font-size: 28px;
+    color: #5a2d1e;
+
+    border-bottom: 2px solid #d9c5b2;
+
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.item-cardapio {
+    background-color: #faf7f2;
+
+    padding: 20px 25px;
+    margin-bottom: 15px;
+
+    border-left: 5px solid #8b3326;
+    border-radius: 8px;
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+
+    transition: 0.3s;
+}
+
+.item-cardapio:hover {
+    transform: translateX(5px);
+}
+
+.item-cardapio h4 {
+    color: #5a2d1e;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.item-cardapio p {
+    color: #625950;
+    margin-bottom: 8px;
+}
+
+.item-cardapio strong {
+    color: #8b3326;
+    font-size: 18px;
+}
+
+
+/* =====================================================
+   12. PÁGINAS INTERNAS
+   ===================================================== */
+
+.pagina {
+    background-color: #faf7f2;
+
+    padding: 40px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.pagina h2 {
+    font-size: 35px;
+    color: #5a2d1e;
+    margin-bottom: 20px;
+}
+
+.pagina p {
+    color: #625950;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   13. SOBRE NÓS
+   ===================================================== */
+
+.sobre-secao {
+    margin-top: 40px;
+
+    padding-top: 25px;
+
+    border-top: 1px solid #dfd2c3;
+}
+
+.sobre-secao h3 {
+    font-size: 25px;
+    color: #5a2d1e;
+    margin-bottom: 15px;
+}
+
+.sobre-secao p {
+    color: #5f554e;
+    margin-bottom: 15px;
+    line-height: 1.8;
+}
+
+
+/* VALORES */
+
+.valores {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 20px;
+
+    margin-top: 20px;
+}
+
+.valor {
+    background-color: #faf7f2;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    border-left: 5px solid #8b3326;
+
+    transition: 0.3s;
+}
+
+.valor:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.valor h4 {
+    color: #5a2d1e;
+
+    font-size: 20px;
+
+    margin-bottom: 8px;
+}
+
+.valor p {
+    margin: 0;
+    font-size: 15px;
+}
+
+
+/* DESTAQUE SOBRE */
+
+.destaque-sobre {
+    background-color: #f5efe6;
+
+    padding: 30px;
+
+    border-left: 6px solid #8b3326;
+
+    border-radius: 10px;
+}
+
+.destaque-sobre h3 {
+    margin-top: 0;
+}
+
+
+/* FRASE FINAL */
+
+.frase-sobre {
+    margin-top: 45px;
+
+    padding: 45px 25px;
+
+    text-align: center;
+
+    background: linear-gradient(
+        135deg,
+        #5a2d1e,
+        #2b1710
+    );
+
+    color: white;
+
+    border-radius: 12px;
+}
+
+.frase-sobre h3 {
+    color: white;
+
+    font-size: 30px;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 10px;
+}
+
+.frase-sobre p {
+    color: #f5efe6;
+    font-size: 17px;
+}
+
+
+/* =====================================================
+   14. CONTATO
+   ===================================================== */
+
+.informacoes {
+    background-color: #faf7f2;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    margin-bottom: 30px;
+
+    border-left: 5px solid #8b3326;
+}
+
+.informacoes h3 {
+    color: #5a2d1e;
+    margin-bottom: 10px;
+}
+
+.informacoes p {
+    margin-bottom: 5px;
+}
+
+
+/* FORMULÁRIO */
+
+form {
+    background-color: #faf7f2;
+
+    padding: 30px;
+
+    border-radius: 10px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+form label {
+    display: block;
+
+    font-weight: bold;
+
+    color: #5a2d1e;
+
+    margin-bottom: 7px;
+}
+
+form input,
+form textarea {
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 20px;
+
+    border: 1px solid #d9c5b2;
+
+    border-radius: 7px;
+
+    background-color: #fffdf9;
+
+    color: #2b2118;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    font-size: 15px;
+}
+
+form input:focus,
+form textarea:focus {
+    outline: none;
+
+    border-color: #8b3326;
+
+    box-shadow: 0 0 0 2px rgba(139, 51, 38, 0.10);
+}
+
+form textarea {
+    resize: vertical;
+}
+
+
+/* BOTÃO DO FORMULÁRIO */
+
+form button,
+#botaoMensagem {
+    background-color: #8b3326;
+
+    color: white;
+
+    border: none;
+
+    padding: 13px 25px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    font-size: 16px;
+
+    transition: 0.3s;
+}
+
+form button:hover,
+#botaoMensagem:hover {
+    background-color: #5a2d1e;
+
+    transform: translateY(-2px);
+}
+
+
+/* MENSAGEM DO JAVASCRIPT */
+
+#resposta {
+    margin-top: 15px;
+
+    min-height: 25px;
+}
+
+.mensagem-atualizada {
+    color: #8b3326;
+
+    font-weight: bold;
+}
+
+
+/* =====================================================
+   15. LINHAS
+   ===================================================== */
+
+hr {
+    border: none;
+
+    border-top: 1px solid #d9c5b2;
+
+    margin: 35px 0;
+}
+
+
+/* =====================================================
+   16. RODAPÉ
+   ===================================================== */
+
+footer {
+    background-color: #2b1710;
+
+    color: #f5efe6;
+
+    text-align: center;
+
+    padding: 30px 20px;
+
+    margin-top: 30px;
+}
+
+footer p {
+    margin-bottom: 5px;
+}
+
+
+/* =====================================================
+   17. RESPONSIVIDADE - TABLETS
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .beneficios {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .inicio h2 {
+        font-size: 38px;
+    }
+}
+
+
+/* =====================================================
+   18. RESPONSIVIDADE - CELULAR
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    nav {
+        gap: 15px;
+    }
+
+    header h1 {
+        font-size: 34px;
+    }
+
+    .valores {
+        grid-template-columns: 1fr;
+    }
+
+    .sobre-secao h3 {
+        font-size: 22px;
+    }
+
+    .frase-sobre {
+        padding: 35px 20px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    main {
+        padding: 25px 15px;
+    }
+
+    .inicio {
+        padding: 50px 20px;
+
+        min-height: auto;
+    }
+
+    .inicio h2 {
+        font-size: 32px;
+    }
+
+    .inicio p {
+        font-size: 15px;
+    }
+
+    .beneficios {
+        grid-template-columns: 1fr;
+    }
+
+    .porque-satoshy {
+        padding: 35px 20px;
+    }
+
+    .chamada-inicio h2 {
+        font-size: 26px;
+    }
+
+    .pagina {
+        padding: 25px 20px;
+    }
+
+    .pagina h2 {
+        font-size: 28px;
+    }
+
+    .categoria-cardapio h3 {
+        font-size: 24px;
+    }
+
+    .item-cardapio {
+        padding: 18px;
+    }
+}
+
+/*buscador de cep*/
+
+.busca-cep {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    background-color: #fffaf4;
+    color: #2b2118;
+    border-radius: 8px;
+}
+
+.busca-cep h2 {
+    color: #5a2d1e;
+}
+
+#formularioCEP {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#cep {
+    padding: 12px;
+    border: 1px solid #bda58e;
+    border-radius: 5px;
+}
+
+#formularioCEP button {
+    padding: 12px;
+    background-color: #5a2d1e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#resultado {
+    margin-top: 20px;
+}
+
+#mensagem {
+    color: #5a2d1e;
+    font-weight: bold;
+}
+
+/* Busca de pratos dentro do cardápio */
+.busca-prato {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #fffaf4;
+    color: #2b2118;
+    border-radius: 8px;
+}
+
+.busca-prato h3 {
+    color: #5a2d1e;
+    margin-bottom: 15px;
+}
+
+#mensagemBusca {
+    margin-top: 15px;
+    color: #5a2d1e;
+    font-weight: bold;
+}
+
+/* Garante que o atributo hidden esconda os pratos filtrados */
+.categoria-cardapio[hidden],
+.item-cardapio[hidden] {
+    display: none;
+}

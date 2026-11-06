@@ -1,0 +1,48 @@
+-- Dados iniciais (cardápio atual do site)
+PRAGMA foreign_keys = ON;
+
+INSERT INTO categoria (id_categoria, nome) VALUES
+    (1, 'Sushis'),
+    (2, 'Sashimis'),
+    (3, 'Temakis'),
+    (4, 'Hot Rolls'),
+    (5, 'Combinados'),
+    (6, 'Pratos Quentes'),
+    (7, 'Entradas'),
+    (8, 'Sobremesas'),
+    (9, 'Bebidas');
+
+INSERT INTO prato (id_prato, nome, descricao, preco, id_categoria) VALUES
+    (1, 'Salmão', 'Sushi tradicional de salmão fresco.', 18.00, 1),
+    (2, 'Atum', 'Sushi de atum fresco, preparado na hora.', 20.00, 1),
+    (3, 'Skin', 'Sushi preparado com pele de salmão grelhada.', 16.00, 1),
+    (4, 'California', 'Arroz, alga, pepino, manga e kani.', 18.00, 1),
+    (5, 'Philadelphia', 'Salmão fresco com cream cheese.', 22.00, 1),
+    (6, 'Sashimi de Salmão', 'Fatias selecionadas de salmão fresco.', 28.00, 2),
+    (7, 'Sashimi de Atum', 'Fatias de atum fresco e selecionado.', 30.00, 2),
+    (8, 'Sashimi Especial', 'Seleção especial de salmão e atum.', 38.00, 2),
+    (9, 'Temaki de Salmão', 'Salmão fresco, arroz e alga.', 22.00, 3),
+    (10, 'Temaki Philadelphia', 'Salmão, cream cheese, arroz e alga.', 24.00, 3),
+    (11, 'Temaki de Atum', 'Atum fresco, arroz e alga.', 24.00, 3),
+    (12, 'Temaki Califórnia', 'Kani, pepino, manga, arroz e alga.', 21.00, 3),
+    (13, 'Hot Roll Tradicional', 'Salmão, arroz e alga empanados e fritos.', 24.00, 4),
+    (14, 'Hot Philadelphia', 'Salmão e cream cheese empanados.', 26.00, 4),
+    (15, 'Hot Especial', 'Salmão, cream cheese e molho especial.', 28.00, 4),
+    (16, 'Combinado Satoshy', '20 peças variadas de sushi e sashimi.', 49.90, 5),
+    (17, 'Combinado Especial', '30 peças de sushi, sashimi e hot roll.', 69.90, 5),
+    (18, 'Combinado Família', '50 peças variadas para compartilhar.', 99.90, 5),
+    (19, 'Yakissoba Tradicional', 'Macarrão japonês com legumes e molho especial.', 28.00, 6),
+    (20, 'Yakissoba de Frango', 'Macarrão, frango, legumes e molho oriental.', 32.00, 6),
+    (21, 'Yakissoba de Carne', 'Macarrão, carne, legumes e molho oriental.', 35.00, 6),
+    (22, 'Frango Empanado', 'Frango crocante acompanhado de molho especial.', 29.00, 6),
+    (23, 'Guioza', 'Porção de guiozas recheados e preparados na chapa.', 18.00, 7),
+    (24, 'Harumaki', 'Rolinho primavera crocante com recheio especial.', 16.00, 7),
+    (25, 'Shimeji', 'Cogumelos shimeji preparados na manteiga.', 25.00, 7),
+    (26, 'Sunomono', 'Salada japonesa de pepino com molho agridoce.', 15.00, 7),
+    (27, 'Banana Caramelizada', 'Banana preparada com calda caramelizada.', 14.00, 8),
+    (28, 'Petit Gateau', 'Bolo de chocolate com recheio cremoso.', 19.00, 8),
+    (29, 'Sorvete', 'Escolha entre os sabores disponíveis.', 12.00, 8),
+    (30, 'Água Mineral', 'Água mineral sem gás.', 5.00, 9),
+    (31, 'Refrigerante', 'Lata de refrigerante.', 7.00, 9),
+    (32, 'Suco Natural', 'Suco natural preparado na hora.', 10.00, 9),
+    (33, 'Chá Gelado', 'Chá gelado com sabor especial.', 9.00, 9);
