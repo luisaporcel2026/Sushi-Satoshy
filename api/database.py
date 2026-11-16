@@ -1,4 +1,5 @@
 """Conexão do sistema com o banco de dados SQLite."""
+
 import sqlite3
 from pathlib import Path
 
@@ -9,21 +10,20 @@ CAMINHO_SEED = BASE / "banco" / "seed.sql"
 
 
 class Conexao:
-    """Responsável por abrir/fechar a conexão e criar o banco."""
+    """Abre conexões e cria o banco quando necessário."""
 
     def __init__(self, caminho=CAMINHO_BANCO):
         self.caminho = str(caminho)
 
     def conectar(self):
+        Path(self.caminho).parent.mkdir(parents=True, exist_ok=True)
         con = sqlite3.connect(self.caminho)
-        con.row_factory = sqlite3.Row          # permite acessar colunas pelo nome
+        con.row_factory = sqlite3.Row
         con.execute("PRAGMA foreign_keys = ON")
-        # LIKE do SQLite só ignora maiúsculas em ASCII; esta função cobre acentos.
-        con.create_function("casefold", 1, lambda t: t.casefold() if t else "")
+        con.create_function("casefold", 1, lambda texto: texto.casefold() if texto else "")
         return con
 
     def criar_banco(self, com_dados=True):
-        """Executa schema.sql (e seed.sql) para criar as tabelas."""
         con = self.conectar()
         try:
             con.executescript(CAMINHO_SCHEMA.read_text(encoding="utf-8"))
@@ -34,7 +34,6 @@ class Conexao:
             con.close()
 
     def testar(self):
-        """Retorna True se a conexão responde."""
         try:
             con = self.conectar()
             con.execute("SELECT 1")

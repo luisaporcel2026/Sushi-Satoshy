@@ -1,330 +1,361 @@
-const API_BASE = "http://localhost:5000/api";
+// Endereço da API Flask que fornece os dados do Satoshy.
+const API_BASE = "http://127.0.0.1:5000/api";
 let carrinho = [];
+
 function formatarMoeda(valor) {
-return Number(valor).toFixed(2).replace(".", ",");
+    return Number(valor).toFixed(2).replace(".", ",");
 }
-// =====================================================
 
-// 1. CARDÁPIO DINÂMICO (GET /api/pratos)
-// =====================================================
+async function lerResposta(resposta) {
+    const dados = await resposta.json();
+    if (!resposta.ok) {
+        throw new Error(dados.erro || "Não foi possível concluir a solicitação.");
+    }
+    return dados;
+}
 
-
+// 1. CARDÁPIO: busca os pratos cadastrados no banco de dados.
 const listaCardapio = document.querySelector("#listaCardapio");
 const formularioPratos = document.querySelector("#formularioPratos");
 const campoBusca = document.querySelector("#buscaPrato");
 const mensagemBusca = document.querySelector("#mensagemBusca");
 const botaoListarTodos = document.querySelector("#listarTodos");
+
 async function carregarCardapio(busca = "") {
-if (!listaCardapio) return;
-mensagemBusca.textContent = "Buscando pratos no servidor...";
-try {
-const url = busca
-? `API {encodeURIComponent(busca)}`
-B
-ASE/pratos? busca =
-: `${API_BASE}/pratos`;
-const resposta = await fetch(url);
-if (!resposta.ok) throw new Error("Erro ao consultar a API de pratos.");
-const pratos = await resposta.json();
-listaCardapio.innerHTML = "";
-if (pratos.length === 0) {
-mensagemBusca.textContent = "Nenhum prato encontrado no cardápio.";
-return;
-}
-mensagemBusca.textContent = busca
-? `${pratos.length} opção(ões) encontrada(s).`
-: `Exibindo ${pratos.length} pratos disponíveis.`;
-const porCategoria = {};
-pratos.forEach((prato) => {
-if (!porCategoria[prato.categoria]) {
-porCategoria[prato.categoria] = [];
-}
-porCategoria[prato.categoria].push(prato);
-});
-Object.entries(porCategoria).forEach(([categoria, itens]) => {
-const secao = document.createElement("section");
-secao.className = "categoria-cardapio";
-const titulo = document.createElement("h3");
-titulo.textContent = categoria;
-secao.appendChild(titulo);
+    if (!listaCardapio || !mensagemBusca) return;
 
-itens.forEach((prato) => {
-const card = document.createElement("div");
-card.className = "item-cardapio";
-card.innerHTML = `
-<div>
-<h4>${prato.nome}</h4>
-<p>${prato.descricao}</p>
-</div>
-<div class="item-acoes">
-<strong>R$ ${formatarMoeda(prato.preco)}</strong>
-<button type="button" class="btn-pequeno">+ Adicionar</button>
-</div>
-`;
-card.querySelector("button").addEventListener("click", () => {
-adicionarAoCarrinho(prato);
-});
-secao.appendChild(card);
-});
-listaCardapio.appendChild(secao);
-});
-} catch (erro) {
-console.error(erro);
-mensagemBusca.textContent = "Não foi possível conectar à API Flask. Verifique se
-python app.py está rodando.";
+    mensagemBusca.textContent = "Carregando cardápio...";
+    listaCardapio.innerHTML = "";
+
+    try {
+        const termo = busca.trim();
+        const url = termo
+            ? `${API_BASE}/pratos?busca=${encodeURIComponent(termo)}`
+            : `${API_BASE}/pratos`;
+
+        const resposta = await fetch(url);
+        const pratos = await lerResposta(resposta);
+
+        if (!Array.isArray(pratos) || pratos.length === 0) {
+            mensagemBusca.textContent = "Nenhum prato encontrado no cardápio.";
+            return;
+        }
+
+        mensagemBusca.textContent = termo
+            ? `${pratos.length} opção(ões) encontrada(s).`
+            : `Exibindo ${pratos.length} pratos disponíveis.`;
+
+        const porCategoria = {};
+        pratos.forEach((prato) => {
+            const categoria = prato.categoria || "Outros";
+            if (!porCategoria[categoria]) porCategoria[categoria] = [];
+            porCategoria[categoria].push(prato);
+        });
+
+        Object.entries(porCategoria).forEach(([categoria, itens]) => {
+            const secao = document.createElement("section");
+            secao.className = "categoria-cardapio";
+
+            const titulo = document.createElement("h3");
+            titulo.textContent = categoria;
+            secao.appendChild(titulo);
+
+            itens.forEach((prato) => {
+                const card = document.createElement("div");
+                card.className = "item-cardapio";
+
+                const informacoes = document.createElement("div");
+                const nome = document.createElement("h4");
+                nome.textContent = prato.nome;
+                const descricao = document.createElement("p");
+                descricao.textContent = prato.descricao;
+                informacoes.append(nome, descricao);
+
+                const acoes = document.createElement("div");
+                acoes.className = "item-acoes";
+                const preco = document.createElement("strong");
+                preco.textContent = `R$ ${formatarMoeda(prato.preco)}`;
+
+                const botaoAdicionar = document.createElement("button");
+                botaoAdicionar.type = "button";
+                botaoAdicionar.className = "btn-pequeno";
+                botaoAdicionar.textContent = "+ Adicionar";
+                botaoAdicionar.addEventListener("click", () => adicionarAoCarrinho(prato));
+
+                acoes.append(preco, botaoAdicionar);
+                card.append(informacoes, acoes);
+                secao.appendChild(card);
+            });
+
+            listaCardapio.appendChild(secao);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar o cardápio:", erro);
+        mensagemBusca.textContent =
+            "Não foi possível carregar o cardápio. Inicie a API Flask e atualize esta página.";
+    }
 }
-}
+
 if (formularioPratos) {
-formularioPratos.addEventListener("submit", (event) => {
-event.preventDefault();
-carregarCardapio(campoBusca.value.trim());
-});
+    formularioPratos.addEventListener("submit", (event) => {
+        event.preventDefault();
+        carregarCardapio(campoBusca ? campoBusca.value : "");
+    });
 }
+
 if (botaoListarTodos) {
-botaoListarTodos.addEventListener("click", () => {
-campoBusca.value = "";
-carregarCardapio("");
-});
+    botaoListarTodos.addEventListener("click", () => {
+        if (campoBusca) campoBusca.value = "";
+        carregarCardapio();
+    });
 }
 
-
-// =====================================================
-// 2. CARRINHO E CRIAÇÃO DE PEDIDO (POST /api/pedidos)
-// =====================================================
-
-
+// 2. CARRINHO E FINALIZAÇÃO DO PEDIDO.
 const listaCarrinhoEl = document.querySelector("#listaCarrinho");
 const totalCarrinhoEl = document.querySelector("#totalCarrinho");
-
 const formularioPedido = document.querySelector("#formularioPedido");
 const mensagemPedido = document.querySelector("#mensagemPedido");
+
 function adicionarAoCarrinho(prato) {
-const existente = carrinho.find((item) => item.id_prato === prato.id);
-if (existente) {
-existente.quantidade += 1;
-} else {
-carrinho.push({
-id_prato: prato.id,
-nome: prato.nome,
-preco: prato.preco,
-quantidade: 1,
-});
+    const idPrato = prato.id;
+    const existente = carrinho.find((item) => item.id_prato === idPrato);
+
+    if (existente) {
+        existente.quantidade += 1;
+    } else {
+        carrinho.push({
+            id_prato: idPrato,
+            nome: prato.nome,
+            preco: Number(prato.preco),
+            quantidade: 1,
+        });
+    }
+
+    atualizarCarrinhoDOM();
 }
-atualizarCarrinhoDOM();
-}
+
 function removerDoCarrinho(idPrato) {
-carrinho = carrinho.filter((item) => item.id_prato !== idPrato);
-atualizarCarrinhoDOM();
+    carrinho = carrinho.filter((item) => item.id_prato !== idPrato);
+    atualizarCarrinhoDOM();
 }
+
 function atualizarCarrinhoDOM() {
-if (!listaCarrinhoEl) return;
-listaCarrinhoEl.innerHTML = "";
-if (carrinho.length === 0) {
-listaCarrinhoEl.innerHTML = "<li>Nenhum item adicionado ao pedido ainda.</li>";
-totalCarrinhoEl.textContent = "0,00";
-return;
-}
-let total = 0;
-carrinho.forEach((item) => {
-const subtotal = item.preco * item.quantidade;
-total += subtotal;
-const li = document.createElement("li");
-li.innerHTML = `
-<span>${item.quantidade}x item. nome(R ${formatarMoeda(subtotal)})</span>
-<button type="button" class="btn-pequeno btn-excluir">Remover</button>
-`;
-li.querySelector("button").addEventListener("click", () =>
-removerDoCarrinho(item.id_prato));
-listaCarrinhoEl.appendChild(li);
-});
+    if (!listaCarrinhoEl || !totalCarrinhoEl) return;
 
-totalCarrinhoEl.textContent = formatarMoeda(total);
+    listaCarrinhoEl.innerHTML = "";
+    if (carrinho.length === 0) {
+        const itemVazio = document.createElement("li");
+        itemVazio.textContent = "Nenhum item adicionado ao pedido ainda.";
+        listaCarrinhoEl.appendChild(itemVazio);
+        totalCarrinhoEl.textContent = "0,00";
+        return;
+    }
+
+    let total = 0;
+    carrinho.forEach((item) => {
+        const subtotal = item.preco * item.quantidade;
+        total += subtotal;
+
+        const li = document.createElement("li");
+        const texto = document.createElement("span");
+        texto.textContent = `${item.quantidade}x ${item.nome} (R$ ${formatarMoeda(subtotal)})`;
+
+        const botaoRemover = document.createElement("button");
+        botaoRemover.type = "button";
+        botaoRemover.className = "btn-pequeno btn-excluir";
+        botaoRemover.textContent = "Remover";
+        botaoRemover.addEventListener("click", () => removerDoCarrinho(item.id_prato));
+
+        li.append(texto, botaoRemover);
+        listaCarrinhoEl.appendChild(li);
+    });
+
+    totalCarrinhoEl.textContent = formatarMoeda(total);
 }
+
 if (formularioPedido) {
-formularioPedido.addEventListener("submit", async (event) => {
-event.preventDefault();
-if (carrinho.length === 0) {
-mensagemPedido.textContent = "Adicione pelo menos um prato ao pedido antes de
-finalizar.";
-return;
+    formularioPedido.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (!mensagemPedido) return;
+        if (carrinho.length === 0) {
+            mensagemPedido.textContent = "Adicione pelo menos um prato antes de finalizar o pedido.";
+            return;
+        }
+
+        const botao = document.querySelector("#btnEnviarPedido");
+        if (botao) botao.disabled = true;
+        mensagemPedido.textContent = "Enviando pedido...";
+
+        const payload = {
+            cliente: {
+                nome: document.querySelector("#clienteNome").value.trim(),
+                email: document.querySelector("#clienteEmail").value.trim(),
+                telefone: document.querySelector("#clienteTelefone").value.trim(),
+            },
+            itens: carrinho.map((item) => ({
+                id_prato: item.id_prato,
+                quantidade: item.quantidade,
+            })),
+        };
+
+        try {
+            const resposta = await fetch(`${API_BASE}/pedidos`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const dados = await lerResposta(resposta);
+            mensagemPedido.textContent = `Pedido #${dados.id} registrado com sucesso!`;
+            mensagemPedido.classList.add("mensagem-atualizada");
+            carrinho = [];
+            atualizarCarrinhoDOM();
+            formularioPedido.reset();
+            await carregarPedidos();
+        } catch (erro) {
+            mensagemPedido.textContent = `Falha ao enviar pedido: ${erro.message}`;
+        } finally {
+            if (botao) botao.disabled = false;
+        }
+    });
 }
-const btn = document.querySelector("#btnEnviarPedido");
-btn.disabled = true;
-mensagemPedido.textContent = "Enviando pedido...";
-const payload = {
-cliente: {
-nome: document.querySelector("#clienteNome").value.trim(),
-email: document.querySelector("#clienteEmail").value.trim(),
-telefone: document.querySelector("#clienteTelefone").value.trim(),
-},
-itens: carrinho.map((i) => ({
-id_prato: i.id_prato,
-quantidade: i.quantidade,
-})),
-};
-try {
-const resposta = await fetch(`${API_BASE}/pedidos`, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(payload),
-});
-const dados = await resposta.json();
-if (!resposta.ok) throw new Error(dados.erro || "Erro ao registrar pedido.");
-mensagemPedido.textContent = `Pedido #${dados.id} registrado com sucesso!`;
-mensagemPedido.classList.add("mensagem-atualizada");
-carrinho = [];
-atualizarCarrinhoDOM();
-formularioPedido.reset();
-await carregarPedidos();
-} catch (erro) {
-mensagemPedido.textContent = `Falha ao enviar pedido: ${erro.message}`;
-} finally {
 
-btn.disabled = false;
-}
-});
-}
-
-
-// =====================================================
-// 3. LISTAR, ATUALIZAR E EXCLUIR PEDIDOS (GET / PUT / DELETE)
-// =====================================================
-
-
+// 3. LISTAGEM, ATUALIZAÇÃO E EXCLUSÃO DE PEDIDOS.
 const listaPedidosEl = document.querySelector("#listaPedidos");
+
 async function carregarPedidos() {
-if (!listaPedidosEl) return;
-try {
-const resposta = await fetch(`${API_BASE}/pedidos`);
-if (!resposta.ok) throw new Error("Erro ao listar pedidos.");
-const pedidos = await resposta.json();
-listaPedidosEl.innerHTML = "";
-if (pedidos.length === 0) {
-listaPedidosEl.innerHTML = "<p>Nenhum pedido registrado ainda.</p>";
-return;
+    if (!listaPedidosEl) return;
+
+    try {
+        const resposta = await fetch(`${API_BASE}/pedidos`);
+        const pedidos = await lerResposta(resposta);
+        listaPedidosEl.innerHTML = "";
+
+        if (pedidos.length === 0) {
+            listaPedidosEl.textContent = "Nenhum pedido registrado ainda.";
+            return;
+        }
+
+        pedidos.forEach((pedido) => {
+            const card = document.createElement("div");
+            card.className = "card-pedido";
+
+            const titulo = document.createElement("h4");
+            titulo.textContent = `Pedido #${pedido.id} — ${pedido.cliente.nome} (${pedido.status})`;
+
+            const itens = document.createElement("p");
+            const resumo = (pedido.itens || [])
+                .map((item) => `${item.quantidade}x ${item.nome_prato}`)
+                .join(", ");
+            itens.textContent = `Itens: ${resumo || "Nenhum item"}`;
+
+            const total = document.createElement("p");
+            total.textContent = `Total: R$ ${formatarMoeda(pedido.valor_total)}`;
+
+            const acoes = document.createElement("div");
+            acoes.className = "card-pedido-acoes";
+
+            const selectStatus = document.createElement("select");
+            selectStatus.setAttribute("aria-label", `Status do pedido ${pedido.id}`);
+            ["ABERTO", "EM_PREPARO", "ENTREGUE", "CANCELADO"].forEach((status) => {
+                const opcao = document.createElement("option");
+                opcao.value = status;
+                opcao.textContent = status;
+                opcao.selected = pedido.status === status;
+                selectStatus.appendChild(opcao);
+            });
+
+            const botaoAtualizar = document.createElement("button");
+            botaoAtualizar.type = "button";
+            botaoAtualizar.className = "btn-pequeno btn-salvar-status";
+            botaoAtualizar.textContent = "Atualizar status";
+            botaoAtualizar.addEventListener("click", () => {
+                atualizarStatusPedido(pedido.id, selectStatus.value);
+            });
+
+            const botaoExcluir = document.createElement("button");
+            botaoExcluir.type = "button";
+            botaoExcluir.className = "btn-pequeno btn-excluir";
+            botaoExcluir.textContent = "Excluir pedido";
+            botaoExcluir.addEventListener("click", () => excluirPedido(pedido.id));
+
+            acoes.append(selectStatus, botaoAtualizar, botaoExcluir);
+            card.append(titulo, itens, total, acoes);
+            listaPedidosEl.appendChild(card);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar pedidos:", erro);
+        listaPedidosEl.textContent = "Não foi possível carregar os pedidos. Verifique se a API está ligada.";
+    }
 }
-pedidos.forEach((pedido) => {
-const div = document.createElement("div");
-div.className = "card-pedido";
-const resumoItens = pedido.itens
-.map((i) => `${i.quantidade}x ${i.nome_prato}`)
-.join(", ");
-div.innerHTML = `
-<h4>Pedido #${pedido.id} — pedido. cliente. nome({pedido.status})</h4>
-<p><strong>Itens:</strong> ${resumoItens}</p>
-<p><strong>Total:</strong> R$ ${formatarMoeda(pedido.valor_total)}</p>
-<div class="card-pedido-acoes">
-<select aria-label="Status do pedido ${pedido.id}">
-<option value="ABERTO" ${pedido.status === "ABERTO" ? "selected" :
 
-""}>ABERTO</option>
-
-<option value="EM_PREPARO" ${pedido.status === "EM_PREPARO" ?
-
-"selected" : ""}>EM_PREPARO</option>
-
-<option value="ENTREGUE" ${pedido.status === "ENTREGUE" ? "selected"
-
-: ""}>ENTREGUE</option>
-
-<option value="CANCELADO" ${pedido.status === "CANCELADO" ?
-
-"selected" : ""}>CANCELADO</option>
-
-</select>
-
-<button type="button" class="btn-pequeno btn-salvar-status">Atualizar
-
-Status</button>
-
-<button type="button" class="btn-pequeno btn-excluir">Excluir Pedido</button>
-</div>
-`;
-const selectStatus = div.querySelector("select");
-div.querySelector(".btn-salvar-status").addEventListener("click", () => {
-atualizarStatusPedido(pedido.id, selectStatus.value);
-});
-div.querySelector(".btn-excluir").addEventListener("click", () => {
-excluirPedido(pedido.id);
-});
-listaPedidosEl.appendChild(div);
-});
-} catch (erro) {
-listaPedidosEl.innerHTML = "<p>Erro ao carregar pedidos do servidor.</p>";
-}
-}
 async function atualizarStatusPedido(idPedido, novoStatus) {
-try {
-const resposta = await fetch(`API {idPedido}`, {
-
-B
-ASE/pedidos/
-
-method: "PUT",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ status: novoStatus }),
-});
-if (!resposta.ok) throw new Error("Não foi possível atualizar o status.");
-await carregarPedidos();
-} catch (erro) {
-alert(erro.message);
+    try {
+        const resposta = await fetch(`${API_BASE}/pedidos/${idPedido}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: novoStatus }),
+        });
+        await lerResposta(resposta);
+        await carregarPedidos();
+    } catch (erro) {
+        alert(erro.message);
+    }
 }
-}
+
 async function excluirPedido(idPedido) {
-if (!confirm(`Deseja realmente excluir o Pedido #${idPedido}?`)) return;
-try {
-const resposta = await fetch(`API {idPedido}`, {
+    if (!confirm(`Deseja realmente excluir o pedido #${idPedido}?`)) return;
 
-B
-ASE/pedidos/
-
-method: "DELETE",
-});
-if (!resposta.ok) throw new Error("Não foi possível excluir o pedido.");
-await carregarPedidos();
-} catch (erro) {
-alert(erro.message);
-}
+    try {
+        const resposta = await fetch(`${API_BASE}/pedidos/${idPedido}`, {
+            method: "DELETE",
+        });
+        await lerResposta(resposta);
+        await carregarPedidos();
+    } catch (erro) {
+        alert(erro.message);
+    }
 }
 
-
-// =====================================================
-// 4. FORMULÁRIO DE CONTATO (POST /api/contato)
-// =====================================================
-
-
+// 4. ENVIO DO FORMULÁRIO DE CONTATO.
 const formularioContato = document.querySelector("#formularioContato");
+
 if (formularioContato) {
-formularioContato.addEventListener("submit", async (event) => {
-event.preventDefault();
-const mensagemContato = document.querySelector("#mensagemContato");
-const botao = document.querySelector("#botaoMensagem");
-botao.disabled = true;
-mensagemContato.textContent = "Enviando mensagem...";
-const payload = {
-nome: document.querySelector("#nome").value.trim(),
-email: document.querySelector("#email").value.trim(),
-texto: document.querySelector("#textoMensagem").value.trim(),
-};
-try {
-const resposta = await fetch(`${API_BASE}/contato`, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(payload),
-});
-const dados = await resposta.json();
-if (!resposta.ok) throw new Error(dados.erro || "Erro ao enviar mensagem.");
-mensagemContato.textContent = dados.mensagem;
-mensagemContato.classList.add("mensagem-atualizada");
-formularioContato.reset();
-} catch (erro) {
-mensagemContato.textContent = `Erro: ${erro.message}`;
-} finally {
-botao.disabled = false;
+    formularioContato.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const mensagemContato = document.querySelector("#mensagemContato");
+        const botao = document.querySelector("#botaoMensagem");
+        if (botao) botao.disabled = true;
+        mensagemContato.textContent = "Enviando mensagem...";
+
+        const payload = {
+            nome: document.querySelector("#nome").value.trim(),
+            email: document.querySelector("#email").value.trim(),
+            texto: document.querySelector("#textoMensagem").value.trim(),
+        };
+
+        try {
+            const resposta = await fetch(`${API_BASE}/contato`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const dados = await lerResposta(resposta);
+            mensagemContato.textContent = dados.mensagem;
+            mensagemContato.classList.add("mensagem-atualizada");
+            formularioContato.reset();
+        } catch (erro) {
+            mensagemContato.textContent = `Erro: ${erro.message}`;
+        } finally {
+            if (botao) botao.disabled = false;
+        }
+    });
 }
-});
-}
+
+// Carrega automaticamente os dados quando a página abre.
 document.addEventListener("DOMContentLoaded", () => {
-carregarCardapio();
-carregarPedidos();
+    if (listaCardapio) carregarCardapio();
+    if (listaPedidosEl) carregarPedidos();
+    if (listaCarrinhoEl) atualizarCarrinhoDOM();
 });

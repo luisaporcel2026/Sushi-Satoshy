@@ -1,86 +1,89 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cardápio e Pedidos - Satoshy</title>
-<link rel="stylesheet" href="../css/style.css">
-<script src="../js/script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio e Pedidos - Satoshy</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/script.js" defer></script>
 </head>
 <body>
-<header>
-<h1>Satoshy</h1>
-<nav>
-<a href="../index.html">Início</a>
-<a href="cardapio.html">Cardápio</a>
-<a href="sobre.html">Sobre Nós</a>
-<a href="contato.html">Contato</a>
-</nav>
-</header>
-<main>
-<section class="pagina">
-<h2>Nosso Cardápio</h2>
-<p class="descricao-cardapio">
-Pratos carregados diretamente do nosso banco de dados. Busque ou adicione
-itens ao seu pedido.
-</p>
-<!-- BUSCA VIA API -->
-<section class="busca-prato">
-<h3>Encontre um prato do Satoshy</h3>
+    <header>
+        <h1>Satoshy</h1>
+        <nav>
+            <a href="../index.html">Início</a>
+            <a href="cardapio.html">Cardápio</a>
+            <a href="sobre.html">Sobre Nós</a>
+            <a href="contato.html">Contato</a>
+        </nav>
+    </header>
 
-<form id="formularioPratos">
-<label for="buscaPrato">Nome do prato, categoria ou ingrediente:</label>
-<input type="text" id="buscaPrato" placeholder="Ex.: salmão, temaki,
+    <main>
+        <section class="pagina">
+            <h2>Nosso Cardápio</h2>
+            <p class="descricao-cardapio">
+                Pratos carregados diretamente do nosso banco de dados. Busque ou adicione
+                itens ao seu pedido.
+            </p>
 
-sobremesa" autocomplete="off">
-<div class="botoes-inicio">
-<button type="submit">Buscar prato</button>
-<button type="button" id="listarTodos" class="botao-secundario">Mostrar
+            <section class="busca-prato">
+                <h3>Encontre um prato do Satoshy</h3>
+                <form id="formularioPratos">
+                    <label for="buscaPrato">Nome do prato, categoria ou ingrediente:</label>
+                    <input
+                        type="text"
+                        id="buscaPrato"
+                        placeholder="Ex.: salmão, temaki, sobremesa"
+                        autocomplete="off"
+                    >
+                    <div class="botoes-inicio">
+                        <button type="submit">Buscar prato</button>
+                        <button type="button" id="listarTodos" class="botao-secundario">
+                            Mostrar todos
+                        </button>
+                    </div>
+                </form>
+                <p id="mensagemBusca" aria-live="polite">Conectando ao cardápio...</p>
+            </section>
 
-todos</button>
-</div>
-</form>
-<p id="mensagemBusca" aria-live="polite">Carregando cardápio...</p>
-</section>
-<!-- CONTAINER DINÂMICO DO CARDÁPIO (GET /api/pratos) -->
-<div id="listaCardapio"></div>
-<hr>
-<!-- CARRINHO E FINALIZAÇÃO DE PEDIDO (POST /api/pedidos) -->
-<section class="busca-prato" id="secaoCarrinho">
-<h3>Seu Pedido</h3>
-<ul id="listaCarrinho" class="lista-carrinho">
-<li>Nenhum item adicionado ao pedido ainda.</li>
-</ul>
-<p><strong>Total do Pedido: R$ <span
-id="totalCarrinho">0,00</span></strong></p>
-<form id="formularioPedido">
-<label for="clienteNome">Seu Nome:</label>
-<input type="text" id="clienteNome" required minlength="3">
+            <div id="listaCardapio"></div>
+            <hr>
 
-<label for="clienteEmail">Seu E-mail:</label>
-<input type="email" id="clienteEmail">
-<label for="clienteTelefone">Telefone (opcional):</label>
-<input type="tel" id="clienteTelefone">
-<button type="submit" id="btnEnviarPedido">Finalizar Pedido</button>
-</form>
-<p id="mensagemPedido" aria-live="polite"></p>
-</section>
-<hr>
-<!-- HISTÓRICO E GERENCIAMENTO DE PEDIDOS (GET, PUT, DELETE
-/api/pedidos) -->
-<section class="sobre-secao">
+            <section class="busca-prato" id="secaoCarrinho">
+                <h3>Seu Pedido</h3>
+                <ul id="listaCarrinho" class="lista-carrinho">
+                    <li>Nenhum item adicionado ao pedido ainda.</li>
+                </ul>
+                <p><strong>Total do Pedido: R$ <span id="totalCarrinho">0,00</span></strong></p>
 
-<h3>Pedidos Registrados</h3>
-<p>Acompanhe o status, atualize o andamento ou remova pedidos do
-sistema:</p>
-<div id="listaPedidos">
-<p>Carregando pedidos...</p>
-</div>
-</section>
-</section>
-</main>
-<footer>
-<p>&copy; 2026 Satoshy - Restaurante Japonês</p>
-</footer>
+                <form id="formularioPedido">
+                    <label for="clienteNome">Seu Nome:</label>
+                    <input type="text" id="clienteNome" required minlength="3" placeholder="Ex.: Ana Silva">
+
+                    <label for="clienteEmail">Seu E-mail:</label>
+                    <input type="email" id="clienteEmail" required placeholder="ana@email.com">
+
+                    <label for="clienteTelefone">Telefone (opcional):</label>
+                    <input type="tel" id="clienteTelefone" placeholder="(19) 99999-9999">
+
+                    <button type="submit" id="btnEnviarPedido">Finalizar Pedido</button>
+                </form>
+                <p id="mensagemPedido" aria-live="polite"></p>
+            </section>
+            <hr>
+
+            <section class="sobre-secao">
+                <h3>Pedidos Registrados</h3>
+                <p>Acompanhe o status, atualize o andamento ou remova pedidos do sistema:</p>
+                <div id="listaPedidos">
+                    <p>Carregando pedidos...</p>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Satoshy - Restaurante Japonês</p>
+    </footer>
 </body>
 </html>
