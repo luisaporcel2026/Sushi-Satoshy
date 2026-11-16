@@ -7,6 +7,8 @@ return Number(valor).toFixed(2).replace(".", ",");
 
 // 1. CARDÁPIO DINÂMICO (GET /api/pratos)
 // =====================================================
+
+
 const listaCardapio = document.querySelector("#listaCardapio");
 const formularioPratos = document.querySelector("#formularioPratos");
 const campoBusca = document.querySelector("#buscaPrato");
@@ -84,9 +86,13 @@ campoBusca.value = "";
 carregarCardapio("");
 });
 }
+
+
 // =====================================================
 // 2. CARRINHO E CRIAÇÃO DE PEDIDO (POST /api/pedidos)
 // =====================================================
+
+
 const listaCarrinhoEl = document.querySelector("#listaCarrinho");
 const totalCarrinhoEl = document.querySelector("#totalCarrinho");
 
@@ -178,9 +184,13 @@ btn.disabled = false;
 }
 });
 }
+
+
 // =====================================================
 // 3. LISTAR, ATUALIZAR E EXCLUIR PEDIDOS (GET / PUT / DELETE)
 // =====================================================
+
+
 const listaPedidosEl = document.querySelector("#listaPedidos");
 async function carregarPedidos() {
 if (!listaPedidosEl) return;
@@ -277,9 +287,12 @@ alert(erro.message);
 }
 }
 
+
 // =====================================================
 // 4. FORMULÁRIO DE CONTATO (POST /api/contato)
 // =====================================================
+
+
 const formularioContato = document.querySelector("#formularioContato");
 if (formularioContato) {
 formularioContato.addEventListener("submit", async (event) => {
