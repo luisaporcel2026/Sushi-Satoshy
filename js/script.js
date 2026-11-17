@@ -1,296 +1,390 @@
 const API_BASE = "http://localhost:5000/api";
 let carrinho = [];
-function formatarMoeda(valor) {
-return Number(valor).toFixed(2).replace(".", ",");
+
+function moeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
-// =====================================================
-// 1. CARDÁPIO DINÂMICO (GET /api/pratos)
-// =====================================================
+
+async function requisitar(url, opcoes = {}) {
+  const resposta = await fetch(url, opcoes);
+  const tipo = resposta.headers.get("content-type") || "";
+  const dados = tipo.includes("application/json")
+    ? await resposta.json()
+    : {};
+
+  if (!resposta.ok) {
+    throw new Error(dados.erro || `Erro na requisição (${resposta.status}).`);
+  }
+
+  return dados;
+}
+
+// CARDÁPIO: GET /api/pratos
 const listaCardapio = document.querySelector("#listaCardapio");
 const formularioPratos = document.querySelector("#formularioPratos");
 const campoBusca = document.querySelector("#buscaPrato");
 const mensagemBusca = document.querySelector("#mensagemBusca");
-const botaoListarTodos = document.querySelector("#listarTodos");
+
 async function carregarCardapio(busca = "") {
-if (!listaCardapio) return;
-mensagemBusca.textContent = "Buscando pratos no servidor...";
-try {
-const url = busca
-? `𝐴𝑃𝐼 {encodeURIComponent(busca)}`
-𝐵
-𝐴𝑆𝐸/𝑝𝑟𝑎𝑡𝑜𝑠? 𝑏𝑢𝑠𝑐𝑎 =
-: `${API_BASE}/pratos`;
-const resposta = await fetch(url);
-if (!resposta.ok) throw new Error("Erro ao consultar a API de pratos.");
-const pratos = await resposta.json();
-listaCardapio.innerHTML = "";
-if (pratos.length === 0) {
-mensagemBusca.textContent = "Nenhum prato encontrado no cardápio.";
-return;
+  if (!listaCardapio) return;
+
+  mensagemBusca.textContent = "Carregando cardápio...";
+
+  try {
+    const url = busca
+      ? `${API_BASE}/pratos?busca=${encodeURIComponent(busca)}`
+      : `${API_BASE}/pratos`;
+
+    const pratos = await requisitar(url);
+    listaCardapio.replaceChildren();
+
+    if (pratos.length === 0) {
+      mensagemBusca.textContent = "Nenhum prato encontrado.";
+      return;
+    }
+
+    mensagemBusca.textContent = `${pratos.length} prato(s) disponível(is).`;
+
+    const grupos = new Map();
+
+    pratos.forEach((prato) => {
+      const categoria = prato.categoria || "Outros";
+
+      if (!grupos.has(categoria)) {
+        grupos.set(categoria, []);
+      }
+
+      grupos.get(categoria).push(prato);
+    });
+
+    grupos.forEach((itens, categoria) => {
+      const secao = document.createElement("section");
+      secao.className = "categoria-cardapio";
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = categoria;
+      secao.append(titulo);
+
+      itens.forEach((prato) => {
+        const card = document.createElement("article");
+        card.className = "item-cardapio";
+
+        const informacoes = document.createElement("div");
+        const nome = document.createElement("h4");
+        nome.textContent = prato.nome;
+
+        const descricao = document.createElement("p");
+        descricao.textContent = prato.descricao;
+
+        informacoes.append(nome, descricao);
+
+        const acoes = document.createElement("div");
+        acoes.className = "item-acoes";
+
+        const preco = document.createElement("strong");
+        preco.textContent = `R$ ${moeda(prato.preco)}`;
+
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "btn-pequeno";
+        botao.textContent = "Adicionar ao pedido";
+        botao.addEventListener("click", () => adicionarAoCarrinho(prato));
+
+        acoes.append(preco, botao);
+        card.append(informacoes, acoes);
+        secao.append(card);
+      });
+
+      listaCardapio.append(secao);
+    });
+  } catch (erro) {
+    console.error(erro);
+    mensagemBusca.textContent =
+      `Não foi possível carregar o cardápio. ${erro.message} ` +
+      "Confira se a API Flask está iniciada.";
+  }
 }
-mensagemBusca.textContent = busca
-? `${pratos.length} opção(ões) encontrada(s).`
-: `Exibindo ${pratos.length} pratos disponíveis.`;
-const porCategoria = {};
-pratos.forEach((prato) => {
-if (!porCategoria[prato.categoria]) {
-porCategoria[prato.categoria] = [];
-}
-porCategoria[prato.categoria].push(prato);
-});
-Object.entries(porCategoria).forEach(([categoria, itens]) => {
-const secao = document.createElement("section");
-secao.className = "categoria-cardapio";
-const titulo = document.createElement("h3");
-titulo.textContent = categoria;
-secao.appendChild(titulo);
-itens.forEach((prato) => {
-const card = document.createElement("div");
-card.className = "item-cardapio";
-card.innerHTML = `
-<div>
-<h4>${prato.nome}</h4>
-<p>${prato.descricao}</p>
-</div>
-<div class="item-acoes">
-<strong>R$ ${formatarMoeda(prato.preco)}</strong>
-<button type="button" class="btn-pequeno">+ Adicionar</button>
-</div>
-`;
-card.querySelector("button").addEventListener("click", () => {
-adicionarAoCarrinho(prato);
-});
-secao.appendChild(card);
-});
-listaCardapio.appendChild(secao);
-});
-} catch (erro) {
-console.error(erro);
-mensagemBusca.textContent = "Não foi possível conectar à API Flask. Verifique se
-python app.py está rodando.";
-}
-}
+
 if (formularioPratos) {
-formularioPratos.addEventListener("submit", (event) => {
-event.preventDefault();
-carregarCardapio(campoBusca.value.trim());
-});
+  formularioPratos.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    carregarCardapio(campoBusca.value.trim());
+  });
+
+  document.querySelector("#listarTodos")?.addEventListener("click", () => {
+    campoBusca.value = "";
+    carregarCardapio();
+  });
 }
-if (botaoListarTodos) {
-botaoListarTodos.addEventListener("click", () => {
-campoBusca.value = "";
-carregarCardapio("");
-});
-}
-// =====================================================
-// 2. CARRINHO E CRIAÇÃO DE PEDIDO (POST /api/pedidos)
-// =====================================================
-const listaCarrinhoEl = document.querySelector("#listaCarrinho");
-const totalCarrinhoEl = document.querySelector("#totalCarrinho");
+
+// CARRINHO E PEDIDOS: POST /api/pedidos
+const listaCarrinho = document.querySelector("#listaCarrinho");
+const totalCarrinho = document.querySelector("#totalCarrinho");
 const formularioPedido = document.querySelector("#formularioPedido");
 const mensagemPedido = document.querySelector("#mensagemPedido");
+
+function atualizarCarrinho() {
+  if (!listaCarrinho) return;
+
+  listaCarrinho.replaceChildren();
+
+  if (carrinho.length === 0) {
+    const vazio = document.createElement("li");
+    vazio.textContent = "Nenhum item adicionado ao pedido ainda.";
+    listaCarrinho.append(vazio);
+    totalCarrinho.textContent = "0,00";
+    return;
+  }
+
+  let total = 0;
+
+  carrinho.forEach((item) => {
+    const subtotal = item.preco * item.quantidade;
+    total += subtotal;
+
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent =
+      `${item.quantidade}x ${item.nome} — R$ ${moeda(subtotal)}`;
+
+    const botaoRemover = document.createElement("button");
+    botaoRemover.type = "button";
+    botaoRemover.className = "btn-pequeno btn-excluir";
+    botaoRemover.textContent = "Remover";
+
+    botaoRemover.addEventListener("click", () => {
+      carrinho = carrinho.filter((produto) => produto.id !== item.id);
+      atualizarCarrinho();
+    });
+
+    li.append(texto, botaoRemover);
+    listaCarrinho.append(li);
+  });
+
+  totalCarrinho.textContent = moeda(total);
+}
+
 function adicionarAoCarrinho(prato) {
-const existente = carrinho.find((item) => item.id_prato === prato.id);
-if (existente) {
-existente.quantidade += 1;
-} else {
-carrinho.push({
-id_prato: prato.id,
-nome: prato.nome,
-preco: prato.preco,
-quantidade: 1,
-});
+  const itemExistente = carrinho.find((item) => item.id === prato.id);
+
+  if (itemExistente) {
+    itemExistente.quantidade += 1;
+  } else {
+    carrinho.push({
+      id: prato.id,
+      nome: prato.nome,
+      preco: Number(prato.preco),
+      quantidade: 1,
+    });
+  }
+
+  atualizarCarrinho();
+
+  if (mensagemPedido) {
+    mensagemPedido.textContent = `${prato.nome} adicionado ao pedido.`;
+  }
 }
-atualizarCarrinhoDOM();
-}
-function removerDoCarrinho(idPrato) {
-carrinho = carrinho.filter((item) => item.id_prato !== idPrato);
-atualizarCarrinhoDOM();
-}
-function atualizarCarrinhoDOM() {
-if (!listaCarrinhoEl) return;
-listaCarrinhoEl.innerHTML = "";
-if (carrinho.length === 0) {
-listaCarrinhoEl.innerHTML = "<li>Nenhum item adicionado ao pedido ainda.</li>";
-totalCarrinhoEl.textContent = "0,00";
-return;
-}
-let total = 0;
-carrinho.forEach((item) => {
-const subtotal = item.preco * item.quantidade;
-total += subtotal;
-const li = document.createElement("li");
-li.innerHTML = `
-<span>${item.quantidade}x 𝑖𝑡𝑒𝑚. 𝑛𝑜𝑚𝑒(𝑅 ${formatarMoeda(subtotal)})</span>
-<button type="button" class="btn-pequeno btn-excluir">Remover</button>
-`;
-li.querySelector("button").addEventListener("click", () =>
-removerDoCarrinho(item.id_prato));
-listaCarrinhoEl.appendChild(li);
-});
-totalCarrinhoEl.textContent = formatarMoeda(total);
-}
+
 if (formularioPedido) {
-formularioPedido.addEventListener("submit", async (event) => {
-event.preventDefault();
-if (carrinho.length === 0) {
-mensagemPedido.textContent = "Adicione pelo menos um prato ao pedido antes de
-finalizar.";
-return;
+  formularioPedido.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    if (carrinho.length === 0) {
+      mensagemPedido.textContent =
+        "Adicione pelo menos um prato antes de finalizar.";
+      return;
+    }
+
+    const botao = document.querySelector("#btnEnviarPedido");
+    botao.disabled = true;
+    mensagemPedido.textContent = "Enviando pedido...";
+
+    const dadosPedido = {
+      cliente: {
+        nome: document.querySelector("#clienteNome").value.trim(),
+        email: document.querySelector("#clienteEmail").value.trim(),
+        telefone: document.querySelector("#clienteTelefone").value.trim(),
+      },
+      itens: carrinho.map((item) => ({
+        id_prato: item.id,
+        quantidade: item.quantidade,
+      })),
+    };
+
+    try {
+      const dados = await requisitar(`${API_BASE}/pedidos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosPedido),
+      });
+
+      mensagemPedido.textContent =
+        `Pedido #${dados.id} registrado com sucesso.`;
+
+      carrinho = [];
+      atualizarCarrinho();
+      formularioPedido.reset();
+      await carregarPedidos();
+    } catch (erro) {
+      mensagemPedido.textContent =
+        `Não foi possível enviar o pedido: ${erro.message}`;
+    } finally {
+      botao.disabled = false;
+    }
+  });
 }
-const btn = document.querySelector("#btnEnviarPedido");
-btn.disabled = true;
-mensagemPedido.textContent = "Enviando pedido...";
-const payload = {
-cliente: {
-nome: document.querySelector("#clienteNome").value.trim(),
-email: document.querySelector("#clienteEmail").value.trim(),
-telefone: document.querySelector("#clienteTelefone").value.trim(),
-},
-itens: carrinho.map((i) => ({
-id_prato: i.id_prato,
-quantidade: i.quantidade,
-})),
-};
-try {
-const resposta = await fetch(`${API_BASE}/pedidos`, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(payload),
-});
-const dados = await resposta.json();
-if (!resposta.ok) throw new Error(dados.erro || "Erro ao registrar pedido.");
-mensagemPedido.textContent = `Pedido #${dados.id} registrado com sucesso!`;
-mensagemPedido.classList.add("mensagem-atualizada");
-carrinho = [];
-atualizarCarrinhoDOM();
-formularioPedido.reset();
-await carregarPedidos();
-} catch (erro) {
-mensagemPedido.textContent = `Falha ao enviar pedido: ${erro.message}`;
-} finally {
-btn.disabled = false;
-}
-});
-}
-// =====================================================
-// 3. LISTAR, ATUALIZAR E EXCLUIR PEDIDOS (GET / PUT / DELETE)
-// =====================================================
-const listaPedidosEl = document.querySelector("#listaPedidos");
+
+// PEDIDOS: GET, PUT e DELETE /api/pedidos
+const listaPedidos = document.querySelector("#listaPedidos");
+const statusDisponiveis = [
+  "ABERTO",
+  "EM_PREPARO",
+  "ENTREGUE",
+  "CANCELADO",
+];
+
 async function carregarPedidos() {
-if (!listaPedidosEl) return;
-try {
-const resposta = await fetch(`${API_BASE}/pedidos`);
-if (!resposta.ok) throw new Error("Erro ao listar pedidos.");
-const pedidos = await resposta.json();
-listaPedidosEl.innerHTML = "";
-if (pedidos.length === 0) {
-listaPedidosEl.innerHTML = "<p>Nenhum pedido registrado ainda.</p>";
-return;
+  if (!listaPedidos) return;
+
+  listaPedidos.textContent = "Carregando pedidos...";
+
+  try {
+    const pedidos = await requisitar(`${API_BASE}/pedidos`);
+    listaPedidos.replaceChildren();
+
+    if (pedidos.length === 0) {
+      listaPedidos.textContent = "Nenhum pedido registrado ainda.";
+      return;
+    }
+
+    pedidos.forEach((pedido) => {
+      const card = document.createElement("article");
+      card.className = "card-pedido";
+
+      const titulo = document.createElement("h4");
+      titulo.textContent =
+        `Pedido #${pedido.id} — ${pedido.cliente?.nome || "Cliente"} ` +
+        `(${pedido.status})`;
+
+      const itens = document.createElement("p");
+      itens.textContent =
+        "Itens: " +
+        (pedido.itens || [])
+          .map((item) => `${item.quantidade}x ${item.nome_prato}`)
+          .join(", ");
+
+      const total = document.createElement("p");
+      total.textContent = `Total: R$ ${moeda(pedido.valor_total)}`;
+
+      const acoes = document.createElement("div");
+      acoes.className = "card-pedido-acoes";
+
+      const seletorStatus = document.createElement("select");
+      seletorStatus.setAttribute(
+        "aria-label",
+        `Status do pedido ${pedido.id}`
+      );
+
+      statusDisponiveis.forEach((status) => {
+        const opcao = document.createElement("option");
+        opcao.value = status;
+        opcao.textContent = status.replace("_", " ");
+        opcao.selected = status === pedido.status;
+        seletorStatus.append(opcao);
+      });
+
+      const botaoAtualizar = document.createElement("button");
+      botaoAtualizar.type = "button";
+      botaoAtualizar.className = "btn-pequeno btn-salvar-status";
+      botaoAtualizar.textContent = "Atualizar status";
+      botaoAtualizar.addEventListener("click", () => {
+        atualizarStatusPedido(pedido.id, seletorStatus.value);
+      });
+
+      const botaoExcluir = document.createElement("button");
+      botaoExcluir.type = "button";
+      botaoExcluir.className = "btn-pequeno btn-excluir";
+      botaoExcluir.textContent = "Excluir pedido";
+      botaoExcluir.addEventListener("click", () => excluirPedido(pedido.id));
+
+      acoes.append(seletorStatus, botaoAtualizar, botaoExcluir);
+      card.append(titulo, itens, total, acoes);
+      listaPedidos.append(card);
+    });
+  } catch (erro) {
+    listaPedidos.textContent = `Erro ao carregar pedidos: ${erro.message}`;
+  }
 }
-pedidos.forEach((pedido) => {
-const div = document.createElement("div");
-div.className = "card-pedido";
-const resumoItens = pedido.itens
-.map((i) => `${i.quantidade}x ${i.nome_prato}`)
-.join(", ");
-div.innerHTML = `
-<h4>Pedido #${pedido.id} — 𝑝𝑒𝑑𝑖𝑑𝑜. 𝑐𝑙𝑖𝑒𝑛𝑡𝑒. 𝑛𝑜𝑚𝑒({pedido.status})</h4>
-<p><strong>Itens:</strong> ${resumoItens}</p>
-<p><strong>Total:</strong> R$ ${formatarMoeda(pedido.valor_total)}</p>
-<div class="card-pedido-acoes">
-<select aria-label="Status do pedido ${pedido.id}">
-<option value="ABERTO" ${pedido.status === "ABERTO" ? "selected" :
-""}>ABERTO</option>
-<option value="EM_PREPARO" ${pedido.status === "EM_PREPARO" ?
-"selected" : ""}>EM_PREPARO</option>
-<option value="ENTREGUE" ${pedido.status === "ENTREGUE" ? "selected"
-: ""}>ENTREGUE</option>
-<option value="CANCELADO" ${pedido.status === "CANCELADO" ?
-"selected" : ""}>CANCELADO</option>
-</select>
-<button type="button" class="btn-pequeno btn-salvar-status">Atualizar
-Status</button>
-<button type="button" class="btn-pequeno btn-excluir">Excluir Pedido</button>
-</div>
-`;
-const selectStatus = div.querySelector("select");
-div.querySelector(".btn-salvar-status").addEventListener("click", () => {
-atualizarStatusPedido(pedido.id, selectStatus.value);
-});
-div.querySelector(".btn-excluir").addEventListener("click", () => {
-excluirPedido(pedido.id);
-});
-listaPedidosEl.appendChild(div);
-});
-} catch (erro) {
-listaPedidosEl.innerHTML = "<p>Erro ao carregar pedidos do servidor.</p>";
+
+async function atualizarStatusPedido(id, status) {
+  try {
+    await requisitar(`${API_BASE}/pedidos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    await carregarPedidos();
+  } catch (erro) {
+    alert(`Não foi possível atualizar o pedido: ${erro.message}`);
+  }
 }
+
+async function excluirPedido(id) {
+  if (!confirm(`Deseja excluir o pedido #${id}?`)) return;
+
+  try {
+    await requisitar(`${API_BASE}/pedidos/${id}`, {
+      method: "DELETE",
+    });
+
+    await carregarPedidos();
+  } catch (erro) {
+    alert(`Não foi possível excluir o pedido: ${erro.message}`);
+  }
 }
-async function atualizarStatusPedido(idPedido, novoStatus) {
-try {
-const resposta = await fetch(`𝐴𝑃𝐼 {idPedido}`, {
-𝐵
-𝐴𝑆𝐸/𝑝𝑒𝑑𝑖𝑑𝑜𝑠/
-method: "PUT",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ status: novoStatus }),
-});
-if (!resposta.ok) throw new Error("Não foi possível atualizar o status.");
-await carregarPedidos();
-} catch (erro) {
-alert(erro.message);
-}
-}
-async function excluirPedido(idPedido) {
-if (!confirm(`Deseja realmente excluir o Pedido #${idPedido}?`)) return;
-try {
-const resposta = await fetch(`𝐴𝑃𝐼 {idPedido}`, {
-𝐵
-𝐴𝑆𝐸/𝑝𝑒𝑑𝑖𝑑𝑜𝑠/
-method: "DELETE",
-});
-if (!resposta.ok) throw new Error("Não foi possível excluir o pedido.");
-await carregarPedidos();
-} catch (erro) {
-alert(erro.message);
-}
-}
-// =====================================================
-// 4. FORMULÁRIO DE CONTATO (POST /api/contato)
-// =====================================================
+
+// CONTATO: POST /api/contato
 const formularioContato = document.querySelector("#formularioContato");
+
 if (formularioContato) {
-formularioContato.addEventListener("submit", async (event) => {
-event.preventDefault();
-const mensagemContato = document.querySelector("#mensagemContato");
-const botao = document.querySelector("#botaoMensagem");
-botao.disabled = true;
-mensagemContato.textContent = "Enviando mensagem...";
-const payload = {
-nome: document.querySelector("#nome").value.trim(),
-email: document.querySelector("#email").value.trim(),
-texto: document.querySelector("#textoMensagem").value.trim(),
-};
-try {
-const resposta = await fetch(`${API_BASE}/contato`, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(payload),
-});
-const dados = await resposta.json();
-if (!resposta.ok) throw new Error(dados.erro || "Erro ao enviar mensagem.");
-mensagemContato.textContent = dados.mensagem;
-mensagemContato.classList.add("mensagem-atualizada");
-formularioContato.reset();
-} catch (erro) {
-mensagemContato.textContent = `Erro: ${erro.message}`;
-} finally {
-botao.disabled = false;
+  formularioContato.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    const mensagem = document.querySelector("#mensagemContato");
+    const botao = document.querySelector("#botaoMensagem");
+
+    botao.disabled = true;
+    mensagem.textContent = "Enviando mensagem...";
+
+    const dadosContato = {
+      nome: document.querySelector("#nome").value.trim(),
+      email: document.querySelector("#email").value.trim(),
+      texto: document.querySelector("#textoMensagem").value.trim(),
+    };
+
+    try {
+      const dados = await requisitar(`${API_BASE}/contato`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosContato),
+      });
+
+      mensagem.textContent = dados.mensagem;
+      formularioContato.reset();
+    } catch (erro) {
+      mensagem.textContent = `Não foi possível enviar: ${erro.message}`;
+    } finally {
+      botao.disabled = false;
+    }
+  });
 }
-});
-}
+
 document.addEventListener("DOMContentLoaded", () => {
-carregarCardapio();
-carregarPedidos();
+  carregarCardapio();
+  carregarPedidos();
+  atualizarCarrinho();
 });
